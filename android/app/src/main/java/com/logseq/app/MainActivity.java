@@ -22,6 +22,7 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(FolderPicker.class);
         registerPlugin(UILocal.class);
+        registerPlugin(TaskNotificationPlugin.class);
 
         super.onCreate(savedInstanceState);
         WebView webView = getBridge().getWebView();
