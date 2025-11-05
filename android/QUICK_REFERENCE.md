@@ -151,3 +151,4 @@ adb shell am broadcast -a android.intent.action.BOOT_COMPLETED
 1. Increase check interval
 2. Reduce number of files
 3. Check WorkManager constraints
+
