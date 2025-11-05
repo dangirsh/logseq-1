@@ -1,0 +1,65 @@
+name: Build-Android-Simple
+
+on:
+  workflow_dispatch:
+    inputs:
+      git-ref:
+        description: "Build from Git Ref"
+        required: true
+        default: "task-notifications-feature"
+
+env:
+  CLOJURE_VERSION: '1.11.1.1413'
+  NODE_VERSION: '22'
+  JAVA_VERSION: '21'
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.git-ref }}
+
+      - name: Install Node.js, NPM and Yarn
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Setup clojure
+        uses: DeLaGuardo/setup-clojure@10.1
+        with:
+          cli: ${{ env.CLOJURE_VERSION }}
+
+      - name: Compile CLJS
+        run: yarn install && yarn release-mobile
+
+      - name: Sync public to Android Project
+        run: npx cap sync android
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3.2.2
+
+      - name: Build Android APK
+        run: |
+          cd android
+          ./gradlew clean
+          ./gradlew assembleRelease
+
+      - name: Rename APK
+        run: |
+          mkdir -p builds
+          cp android/app/build/outputs/apk/release/app-release-unsigned.apk ./builds/Logseq-android-custom.apk
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: logseq-android-apk
+          path: builds/Logseq-android-custom.apk
