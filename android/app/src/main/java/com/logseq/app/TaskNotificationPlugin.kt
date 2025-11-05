@@ -11,7 +11,7 @@ class TaskNotificationPlugin : Plugin() {
 
     @PluginMethod
     fun enableNotifications(call: PluginCall) {
-        val intervalMinutes = call.getLong("intervalMinutes", 15L)
+        val intervalMinutes = call.getLong("intervalMinutes") ?: 15L
         
         try {
             TaskNotificationScheduler.schedulePeriodic(context, intervalMinutes)
@@ -45,7 +45,9 @@ class TaskNotificationPlugin : Plugin() {
     fun isEnabled(call: PluginCall) {
         try {
             val isScheduled = TaskNotificationScheduler.isScheduled(context)
-            call.resolve(mapOf("enabled" to isScheduled))
+            val result = com.getcapacitor.JSObject()
+            result.put("enabled", isScheduled)
+            call.resolve(result)
         } catch (e: Exception) {
             call.reject("Failed to check status: ${e.message}")
         }
