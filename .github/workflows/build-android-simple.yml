@@ -53,10 +53,22 @@ jobs:
           ./gradlew clean
           ./gradlew assembleRelease
 
+      - name: Sign APK with debug key
+        run: |
+          keytool -genkey -v -keystore debug.keystore -alias androiddebugkey \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass android -keypass android \
+            -dname "CN=Android Debug,O=Android,C=US"
+          $ANDROID_SDK_ROOT/build-tools/34.0.0/apksigner sign \
+            --ks debug.keystore --ks-pass pass:android \
+            --key-pass pass:android \
+            --in android/app/build/outputs/apk/release/app-release-unsigned.apk \
+            --out android/app/build/outputs/apk/release/app-release-signed.apk
+
       - name: Rename APK
         run: |
           mkdir -p builds
-          cp android/app/build/outputs/apk/release/app-release-unsigned.apk ./builds/Logseq-android-custom.apk
+          cp android/app/build/outputs/apk/release/app-release-signed.apk ./builds/Logseq-android-custom.apk
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
