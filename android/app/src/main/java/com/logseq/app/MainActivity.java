@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.webkit.ValueCallback;
 
 import com.getcapacitor.BridgeActivity;
+import com.logseq.app.notifications.TaskNotificationScheduler;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -14,7 +15,11 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(FolderPicker.class);
         registerPlugin(FsWatcher.class);
+        registerPlugin(TaskNotificationPlugin.class);
         super.onCreate(savedInstanceState);
+
+        // Auto-enable task notifications on startup
+        TaskNotificationScheduler.schedulePeriodic(getApplicationContext(), 15);
 
         new Timer().schedule(new TimerTask() {
             @Override
