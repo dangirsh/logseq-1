@@ -39,8 +39,14 @@ jobs:
           cli: ${{ env.CLOJURE_VERSION }}
 
       - name: Compile CLJS
-        run: yarn install && yarn release-mobile
-
+        run: |
+          yarn install
+          if grep -q "release-mobile" package.json; then
+            yarn release-mobile
+          else
+            yarn gulp:build && yarn cljs:release-app
+            rm -rf ./public/static && rm -rf ./static/js/*.map && mv static ./public
+          fi
       - name: Sync public to Android Project
         run: npx cap sync android
 
